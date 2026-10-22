@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
+import ThomaAssistant from "@/components/ThomaAssistant";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -36,6 +37,7 @@ export default function RootLayout({
         <main className="pt-[98px] max-md:pt-[90px]">{children}</main>
         <Footer />
         <WhatsAppFloat />
+        <ThomaAssistant />
       </body>
     </html>
   );

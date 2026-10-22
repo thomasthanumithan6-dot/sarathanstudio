@@ -1,0 +1,42 @@
+
+> sarathan-studio@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/13) ...
+   Generating static pages (3/13) 
+   Generating static pages (6/13) 
+   Generating static pages (9/13) 
+ ✓ Generating static pages (13/13)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    1.24 kB        97.3 kB
+├ ○ /_not-found                          873 B          88.2 kB
+├ ƒ /admin                               5.69 kB          93 kB
+├ ○ /ai-preview                          2.08 kB        89.4 kB
+├ ○ /album                               1.89 kB        89.3 kB
+├ ƒ /api/ai-preview                      0 B                0 B
+├ ƒ /api/thoma                           0 B                0 B
+├ ○ /booking                             2.31 kB         126 kB
+├ ○ /login                               2.72 kB         127 kB
+├ ƒ /my-gallery                          4.11 kB         137 kB
+└ ○ /reset-password                      1.91 kB         126 kB
++ First Load JS shared by all            87.4 kB
+  ├ chunks/117-e2f39e763379c797.js       31.7 kB
+  ├ chunks/fd9d1056-008cce316aa37aa7.js  53.6 kB
+  └ other shared chunks (total)          1.99 kB
+
+
+ƒ Middleware                             56.5 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

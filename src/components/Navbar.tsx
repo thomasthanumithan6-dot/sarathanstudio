@@ -48,6 +48,11 @@ export default function Navbar() {
     router.refresh();
   }
 
+  function openSearch() {
+    setOpen(false);
+    window.dispatchEvent(new Event("open-thoma-search"));
+  }
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 bg-ivory/95 shadow-[0_2px_15px_rgba(0,0,0,0.04)] backdrop-blur">
       <div className="mx-auto flex h-[98px] max-w-7xl items-center justify-between px-[6%] max-md:h-[90px]">
@@ -99,6 +104,18 @@ export default function Navbar() {
               Login
             </Link>
           )}
+          <button
+            type="button"
+            onClick={openSearch}
+            aria-label="Search Sarathan Studio"
+            title="Search Sarathan Studio"
+            className="grid h-10 w-10 flex-none place-items-center rounded-full border border-[#e6dac8] text-espresso transition hover:border-gold hover:text-gold"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="10.8" cy="10.8" r="6.8" />
+              <path d="m16 16 4.5 4.5" strokeLinecap="round" />
+            </svg>
+          </button>
           <Link
             href="/booking"
             className="whitespace-nowrap rounded-full bg-gold px-5 py-3 text-[13px] text-white transition hover:-translate-y-0.5 hover:bg-espresso max-md:px-3 max-md:py-2.5 max-md:text-xs"
