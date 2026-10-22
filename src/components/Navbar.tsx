@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { demoSignOut, getDemoUser } from "@/lib/demo-auth";
 
 const LINKS = [
   { href: "/", label: "Home" },
@@ -14,7 +17,36 @@ const LINKS = [
 ];
 
 export default function Navbar() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    if (isSupabaseConfigured()) {
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data: { user } }) => setSignedIn(Boolean(user)));
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSignedIn(Boolean(session));
+      });
+      return () => subscription.unsubscribe();
+    }
+
+    setSignedIn(Boolean(getDemoUser()));
+  }, []);
+
+  async function handleSignOut() {
+    if (isSupabaseConfigured()) {
+      await createClient().auth.signOut();
+    } else {
+      demoSignOut();
+    }
+    setSignedIn(false);
+    setOpen(false);
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 bg-ivory/95 shadow-[0_2px_15px_rgba(0,0,0,0.04)] backdrop-blur">
@@ -51,12 +83,22 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="hidden text-[13px] text-espresso transition hover:text-gold md:inline"
-          >
-            Login
-          </Link>
+          {signedIn ? (
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="hidden text-[13px] text-espresso transition hover:text-gold md:inline"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden text-[13px] text-espresso transition hover:text-gold md:inline"
+            >
+              Login
+            </Link>
+          )}
           <Link
             href="/booking"
             className="whitespace-nowrap rounded-full bg-gold px-5 py-3 text-[13px] text-white transition hover:-translate-y-0.5 hover:bg-espresso max-md:px-3 max-md:py-2.5 max-md:text-xs"
@@ -87,13 +129,23 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/login"
-            onClick={() => setOpen(false)}
-            className="block py-2 text-sm text-espresso transition hover:text-gold"
-          >
-            Login
-          </Link>
+          {signedIn ? (
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="block w-full py-2 text-left text-sm text-espresso transition hover:text-gold"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="block py-2 text-sm text-espresso transition hover:text-gold"
+            >
+              Login
+            </Link>
+          )}
         </nav>
       )}
     </header>

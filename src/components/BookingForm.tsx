@@ -82,8 +82,20 @@ export default function BookingForm({ packages }: { packages: Package[] }) {
         const {
           data: { user },
         } = await supabase.auth.getUser();
+
+        // Link to the customers record (its ID differs from the auth user ID).
+        let customerId: string | null = null;
+        if (user) {
+          const { data: customer } = await supabase
+            .from("customers")
+            .select("id")
+            .eq("profile_id", user.id)
+            .maybeSingle();
+          customerId = customer?.id ?? null;
+        }
+
         const { error: insertError } = await supabase.from("bookings").insert({
-          customer_id: user?.id ?? null,
+          customer_id: customerId,
           name: name.trim(),
           phone: phone.trim(),
           event_type: eventType,

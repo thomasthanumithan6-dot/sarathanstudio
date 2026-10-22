@@ -8,9 +8,11 @@ import { demoSignIn, demoSignUp } from "@/lib/demo-auth";
 const inputClass =
   "w-full rounded-md border border-[#e6dac8] bg-white px-4 py-3.5 text-sm outline-none transition focus:border-gold";
 
+type Mode = "signin" | "signup" | "forgot";
+
 export default function LoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<Mode>("signin");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +21,38 @@ export default function LoginPage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const supabaseReady = isSupabaseConfigured();
+
+  function switchMode(nextMode: Mode) {
+    setMode(nextMode);
+    setError(null);
+    setNotice(null);
+  }
+
+  async function handleForgotPassword(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setNotice(null);
+
+    if (!supabaseReady) {
+      setError("Password reset requires Supabase (demo accounts cannot be recovered).");
+      return;
+    }
+
+    setStatus("loading");
+    try {
+      const supabase = createClient();
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+    } catch {
+      // Deliberately ignored below: never reveal whether the email exists.
+    } finally {
+      setStatus("idle");
+      setNotice(
+        "If an account exists for this email, a password reset link has been sent. Please check your inbox."
+      );
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -96,12 +130,53 @@ export default function LoginPage() {
           CUSTOMER AREA
         </p>
         <h1 className="mt-2 text-center font-display text-3xl font-semibold">
-          {mode === "signin" ? "Sign In" : "Create Account"}
+          {mode === "signin" && "Sign In"}
+          {mode === "signup" && "Create Account"}
+          {mode === "forgot" && "Reset Password"}
         </h1>
         <p className="mt-2 text-center text-xs text-mocha">
           Access your private photo gallery and selections.
         </p>
 
+        {mode === "forgot" && (
+          <form onSubmit={handleForgotPassword} className="mt-6 grid gap-4">
+            <div>
+              <label htmlFor="email" className="mb-1 block text-xs font-medium">
+                Email *
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                className={inputClass}
+              />
+            </div>
+
+            {error && (
+              <p role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </p>
+            )}
+            {notice && (
+              <p role="status" className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-700">
+                {notice}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={status === "loading"}
+              className="rounded-full bg-gold px-6 py-3.5 text-sm text-white transition hover:-translate-y-0.5 hover:bg-espresso disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {status === "loading" ? "Sending…" : "Send Reset Link"}
+            </button>
+          </form>
+        )}
+
+        {mode !== "forgot" && (
         <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
           {mode === "signup" && (
             <div>
@@ -172,17 +247,24 @@ export default function LoginPage() {
                 ? "Sign In"
                 : "Create Account"}
           </button>
+
+          {mode === "signin" && (
+            <button
+              type="button"
+              onClick={() => switchMode("forgot")}
+              className="text-center text-xs text-mocha underline underline-offset-4 transition hover:text-gold"
+            >
+              Forgot your password?
+            </button>
+          )}
         </form>
+        )}
 
         <p className="mt-5 text-center text-xs text-mocha">
           {mode === "signin" ? "New customer? " : "Already have an account? "}
           <button
             type="button"
-            onClick={() => {
-              setMode(mode === "signin" ? "signup" : "signin");
-              setError(null);
-              setNotice(null);
-            }}
+            onClick={() => switchMode(mode === "signin" ? "signup" : "signin")}
             className="font-medium text-gold underline underline-offset-4"
           >
             {mode === "signin" ? "Create an account" : "Sign in"}
