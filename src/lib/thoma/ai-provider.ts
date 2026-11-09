@@ -23,6 +23,16 @@ export type ProviderCompletion = {
   finishReason: string | null;
 };
 
+export class AIProviderError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code: string | null
+  ) {
+    super("The AI provider could not complete the request.");
+    this.name = "AIProviderError";
+  }
+}
+
 export interface AIProvider {
   complete(input: {
     messages: ProviderMessage[];
@@ -54,11 +64,14 @@ class OpenAIProvider implements AIProvider {
       signal,
     });
 
+    const result = await response.json().catch(() => null);
     if (!response.ok) {
-      throw new Error("THOMA's AI provider could not complete the request.");
+      const code = result?.error?.code;
+      throw new AIProviderError(
+        response.status,
+        typeof code === "string" && /^[a-z0-9_-]{1,80}$/i.test(code) ? code : null
+      );
     }
-
-    const result = await response.json();
     const choice = result?.choices?.[0];
     if (!choice?.message || typeof choice.message !== "object") {
       throw new Error("THOMA received an invalid response from its AI provider.");

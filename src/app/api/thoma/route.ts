@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPublicStudioContent } from "@/lib/thoma-content";
-import { getAIProvider, type ProviderMessage, type ProviderTool } from "@/lib/thoma/ai-provider";
+import { AIProviderError, getAIProvider, type ProviderMessage, type ProviderTool } from "@/lib/thoma/ai-provider";
 import { extractRelevantDocumentText, type ThomaDocument } from "@/lib/thoma/document-input";
 import {
   getAvailableStudioLookups,
@@ -338,7 +338,18 @@ export async function POST(request: Request) {
       { error: "THOMA could not complete that request. Please try a shorter question." },
       { status: 502 }
     );
-  } catch {
+  } catch (error) {
+    if (error instanceof AIProviderError) {
+      let message = `The AI provider returned HTTP ${error.status}. Check the OpenAI project and model settings.`;
+      if (error.code === "invalid_api_key" || error.status === 401 || error.status === 403) {
+        message = "OpenAI rejected the configured API key. Update OPENAI_API_KEY in Vercel and redeploy.";
+      } else if (error.code === "insufficient_quota" || error.status === 429) {
+        message = "OpenAI has no available quota or is rate-limiting this project. Check its billing and usage limits.";
+      } else if (error.code === "model_not_found") {
+        message = "The configured OpenAI model is unavailable. Set OPENAI_MODEL to gpt-4o-mini in Vercel and redeploy.";
+      }
+      return NextResponse.json({ error: message }, { status: 502 });
+    }
     return NextResponse.json(
       { error: "THOMA is temporarily unavailable. Please try again shortly." },
       { status: 502 }
