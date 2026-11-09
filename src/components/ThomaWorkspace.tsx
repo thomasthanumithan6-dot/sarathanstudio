@@ -164,7 +164,7 @@ export default function ThomaWorkspace() {
             const existing = merged.get(thread.id);
             if (!existing || thread.updatedAt > existing.updatedAt) merged.set(thread.id, thread);
           }
-          return [...merged.values()].sort((left, right) => right.updatedAt - left.updatedAt).slice(0, 50);
+          return Array.from(merged.values()).sort((left, right) => right.updatedAt - left.updatedAt).slice(0, 50);
         });
         setActiveId(data.threads[0].id);
       })
