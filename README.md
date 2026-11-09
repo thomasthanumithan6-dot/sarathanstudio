@@ -44,6 +44,42 @@ Copy `.env.example` to `.env.local` and fill in values. All secrets stay
 server-side; only the `NEXT_PUBLIC_*` values are visible to the browser, and
 none of them are secret keys.
 
+## THOMA AI setup
+
+THOMA's general chat, image understanding, prompt-based image generation, and
+the existing AI photo preview require `OPENAI_API_KEY`. Set it as a
+server-side environment variable in
+Vercel and redeploy; never use a `NEXT_PUBLIC_` prefix. `OPENAI_MODEL` defaults
+to `gpt-4o-mini`; `OPENAI_DOCUMENT_MODEL` optionally selects the model used for
+PDF/DOCX extraction. Live web search is optional and requires a server-side
+`TAVILY_API_KEY`.
+
+For studio lookups, first apply `supabase/schema.sql`, then run
+`supabase/migrations/20261109_thoma_staff_readonly.sql` in the Supabase SQL
+Editor. The existing `admin` profile role is the owner and has all lookup
+permissions. Staff are read-only and must be explicitly granted scopes by the
+owner, for example:
+
+```sql
+insert into public.studio_staff_access (user_id, permissions)
+select id, array['bookings.read', 'customers.read']::text[]
+from auth.users
+where email = 'staff@example.com'
+on conflict (user_id) do update
+set permissions = excluded.permissions;
+```
+
+The AI cannot create, update, or delete studio records. Studio data is read
+through a permission-checked RPC and remains subject to server authentication.
+When enabled, guest chat history is stored in the current browser. Signed-in
+users can sync history to their own Supabase rows under RLS; disabling memory
+deletes both local and account copies. Voice uses the browser's speech APIs.
+Image attachments accept JPEG, PNG, and WebP up to 3 MB.
+Plain-text documents are read locally; PDF and DOCX files up to 3 MB are sent
+to OpenAI for extraction using the server-side key. Uploads are not stored by
+the application unless their extracted text is included in a conversation that
+the user has explicitly chosen to save.
+
 ## Supabase setup
 
 1. Create a free project at https://supabase.com

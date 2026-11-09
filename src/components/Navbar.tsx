@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/#services", label: "Services" },
   { href: "/#gallery", label: "Gallery" },
   { href: "/album", label: "Album" },
+  { href: "/thoma", label: "THOMA AI" },
   { href: "/ai-preview", label: "AI Preview" },
   { href: "/my-gallery", label: "My Gallery" },
   { href: "/#contact", label: "Contact" },

@@ -19,6 +19,11 @@ const STYLE_PROMPTS: Record<string, string> = {
  * is not configured so the UI can say so honestly.
  */
 export async function POST(request: Request) {
+  const contentLength = Number(request.headers.get("content-length") ?? "0");
+  if (contentLength > 4_500_000) {
+    return NextResponse.json({ error: "The upload is too large." }, { status: 413 });
+  }
+
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
@@ -42,6 +47,12 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "A valid image file is required." },
         { status: 400 }
+      );
+    }
+    if (image.size > 3 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: "Images must be 3 MB or smaller." },
+        { status: 413 }
       );
     }
     if (!prompt) {

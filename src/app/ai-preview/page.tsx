@@ -28,7 +28,7 @@ const STYLES = [
 type StyleId = (typeof STYLES)[number]["id"];
 type Status = "idle" | "loading" | "done" | "error";
 
-const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8 MB
+const MAX_FILE_SIZE = 3 * 1024 * 1024; // Fits serverless request limits.
 
 export default function AiPreviewPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -51,7 +51,7 @@ export default function AiPreviewPage() {
       return;
     }
     if (selected.size > MAX_FILE_SIZE) {
-      setMessage("Please choose an image smaller than 8 MB.");
+      setMessage("Please choose an image smaller than 3 MB.");
       return;
     }
 

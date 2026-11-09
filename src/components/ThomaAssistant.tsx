@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type Mode = "search" | "chat";
@@ -17,6 +18,7 @@ const SUGGESTIONS = [
 ];
 
 export default function ThomaAssistant() {
+  const pathname = usePathname();
   const [mode, setMode] = useState<Mode>("search");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -126,6 +128,8 @@ export default function ThomaAssistant() {
   function closePanel() {
     setOpen(false);
   }
+
+  if (pathname === "/thoma") return null;
 
   return (
     <>
