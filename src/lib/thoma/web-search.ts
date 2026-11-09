@@ -26,9 +26,11 @@ export async function searchWeb(query: string): Promise<WebSearchResult[]> {
   if (!response.ok) throw new Error("Web search is temporarily unavailable.");
 
   const data = await response.json();
-  const results = Array.isArray(data?.results) ? data.results : [];
-  return results.flatMap((result): WebSearchResult[] => {
-    if (typeof result?.url !== "string") return [];
+  const results: unknown[] = Array.isArray(data?.results) ? data.results : [];
+  return results.flatMap((entry): WebSearchResult[] => {
+    if (!entry || typeof entry !== "object" || !("url" in entry)) return [];
+    const result = entry as { url?: unknown; title?: unknown; content?: unknown };
+    if (typeof result.url !== "string") return [];
     try {
       const url = new URL(result.url);
       if (url.protocol !== "https:") return [];
