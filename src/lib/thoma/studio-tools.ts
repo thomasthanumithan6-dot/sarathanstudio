@@ -48,7 +48,7 @@ export async function getStudioToolAccess() {
     .maybeSingle();
 
   if (profile?.role === "admin") {
-    return { supabase, isOwner: true, permissions: [...VALID_PERMISSIONS] };
+    return { supabase, isOwner: true, permissions: Array.from(VALID_PERMISSIONS) };
   }
 
   const { data: staff } = await supabase
